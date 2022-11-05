@@ -33,13 +33,13 @@ Focus {
 			scrambledPeerArray.postln;
 		}, '/newPeerArray');
 
-		fork{
-			1.wait;
-			scrambledPeerArray = peerNames.asArray.scramble;
-			peers.sendAll('/newPeerArray', *scrambledPeerArray); // makes sure that everyone have the same scrambled list
-		};
-
 		this.makeWindow(4); // spacing in pixels
+		this.scramblePeerArray;
+	}
+
+	scramblePeerArray { // makes sure everyone has the same array of names
+		scrambledPeerArray = peers.names.asArray.scramble;
+		peers.sendAll('/newPeerArray', *scrambledPeerArray);
 	}
 
 	obliquePlayer {
