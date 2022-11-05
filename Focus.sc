@@ -29,13 +29,15 @@ Focus {
 
 		OSCdef(name.asSymbol, {|msg|
 			msg.removeAt(0);
-			msg[1].postln;
 			scrambledPeerArray = msg;
 			scrambledPeerArray.postln;
 		}, '/newPeerArray');
 
-		scrambledPeerArray = peerNames.asArray.scramble;
-		peers.sendAll('/newPeerArray', *scrambledPeerArray); // makes sure that everyone have the same scrambled list
+		fork{
+			1.wait;
+			scrambledPeerArray = peerNames.asArray.scramble;
+			peers.sendAll('/newPeerArray', *scrambledPeerArray); // makes sure that everyone have the same scrambled list
+		};
 
 		this.makeWindow(4); // spacing in pixels
 	}
