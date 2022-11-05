@@ -2,22 +2,41 @@
 // Title         : Focus
 // Description   :
 //               | for live-electronic ensemble by Mattias Petersson, 2019
+//
+// Requires the Utopia quark. Run:
+// Quarks.install("https://github.com/muellmusik/Utopia")
 // ===========================================================================
 
 Focus {
 
-	var numPlayers, restProbability = 0.1, timeUnit, fontSize, repeats;
+	var name, numPlayers, numCards, restProbability, timeUnit, fontSize, repeats;
 	var win, cards, strategy, clearedCards, tempoClock;
+	var hail, <peers, peerNames, <scrambledPeerArray;
 
-	*new {|numPlayers = 1, restProbability = 0.1, timeUnit = 9, fontSize = 18, repeats = 1|
-		^super.newCopyArgs(numPlayers, restProbability, timeUnit, fontSize, repeats).initFocus;
+	*new {|name = 'yourNameHere', numPlayers = 9, numCards = 1, restProbability = 0.1, timeUnit = 9, fontSize = 18, repeats = 1|
+		^super.newCopyArgs(name, numPlayers, numCards, restProbability, timeUnit, fontSize, repeats).initFocus;
 	}
 
 	initFocus {
-		cards = numPlayers.collect{|i| FocusCard(fontSize)};
+		cards = numCards.collect{|i| FocusCard(fontSize)};
 		strategy = Pn(Pshuf(this.strategies)).asStream;
 		tempoClock = TempoClock.default;
 		tempoClock.tempo = 1;
+
+		hail = Hail(me: Peer(name.asSymbol, NetAddr.localAddr), oscPath: '/focus');
+		peers = hail.addrBook;
+		peerNames = peers.names; // returns a Set
+
+		OSCdef(name.asSymbol, {|msg|
+			msg.removeAt(0);
+			msg[1].postln;
+			scrambledPeerArray = msg;
+			scrambledPeerArray.postln;
+		}, '/newPeerArray');
+
+		scrambledPeerArray = peerNames.asArray.scramble;
+		peers.sendAll('/newPeerArray', *scrambledPeerArray); // makes sure that everyone have the same scrambled list
+
 		this.makeWindow(4); // spacing in pixels
 	}
 
@@ -32,12 +51,20 @@ Focus {
 
 			repeats.do{
 				// new cards for each player one by one
-				numPlayers.do{|i|
+				scrambledPeerArray.do{|n|
+					if(n == name) {
+						defer {
+							this.updateCard(urn.next);
+						};
+						timeUnit.wait;
+					};
+				};
+				/*numPlayers.do{|i|
 					defer {
 						this.updateCard(urn.next);
 					};
 					timeUnit.wait;
-				};
+				};*/
 				timeUnit.wait;
 
 				// new cards for everyone
@@ -100,12 +127,12 @@ Focus {
 
 	makeWindow {|space|
 		var obPlayer, grid, for, by;
-		case {numPlayers == 1} {for = 1; by = 1};
-		case {numPlayers == 4} {for = 2; by = 2};
-		case {numPlayers == 8} {for = 4; by = 2};
-		case {numPlayers == 9} {for = 3; by = 3};
-		case {numPlayers == 12} {for = 4; by = 3};
-		case {numPlayers == 16} {for = 3; by = 4};
+		case {numCards == 1} {for = 1; by = 1};
+		case {numCards == 4} {for = 2; by = 2};
+		case {numCards == 8} {for = 4; by = 2};
+		case {numCards == 9} {for = 3; by = 3};
+		case {numCards == 12} {for = 4; by = 3};
+		case {numCards == 16} {for = 3; by = 4};
 
 		win = Window("Focus");
 		grid = GridLayout();
