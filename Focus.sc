@@ -1,11 +1,11 @@
-// ===========================================================================
+// ===============================================================================
 // Title         : Focus
 // Description   :
-//               | for live-electronic ensemble by Mattias Petersson, 2019
+//               | for live-electronic ensemble by Mattias Petersson, 2019 - 2022
 //
 // Requires the Utopia quark. Run:
 // Quarks.install("https://github.com/muellmusik/Utopia")
-// ===========================================================================
+// ===============================================================================
 
 Focus {
 
@@ -13,7 +13,7 @@ Focus {
 	var win, cards, strategy, clearedCards, tempoClock;
 	var hail, <peers, peerNames, <scrambledPeerArray;
 
-	*new {|name = 'yourNameHere', numPlayers = 9, numCards = 1, restProbability = 0.1, timeUnit = 9, fontSize = 18, repeats = 1|
+	*new {|name = 'yourNameHere', numPlayers = 10, numCards = 1, restProbability = 0.1, timeUnit = 9, fontSize = 18, repeats = 1|
 		^super.newCopyArgs(name, numPlayers, numCards, restProbability, timeUnit, fontSize, repeats).initFocus;
 	}
 
@@ -30,7 +30,8 @@ Focus {
 		OSCdef(name.asSymbol, {|msg|
 			msg.removeAt(0);
 			scrambledPeerArray = msg;
-			scrambledPeerArray.postln;
+			"% of % players are ready: %".format(scrambledPeerArray.size, numPlayers, scrambledPeerArray).postln;
+			if(numPlayers == scrambledPeerArray.size) {"Press space together to start.".postln};
 		}, '/newPeerArray');
 
 		this.makeWindow(4); // spacing in pixels
@@ -38,7 +39,6 @@ Focus {
 		fork{
 			3.wait;
 			this.scramblePeerArray;
-			"Ready to play together with %".format(scrambledPeerArray);
 		};
 	}
 
