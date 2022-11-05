@@ -34,7 +34,12 @@ Focus {
 		}, '/newPeerArray');
 
 		this.makeWindow(4); // spacing in pixels
-		fork{4.wait; this.scramblePeerArray;}
+
+		fork{
+			3.wait;
+			this.scramblePeerArray;
+			"Ready to play together with %".format(scrambledPeerArray);
+		};
 	}
 
 	scramblePeerArray { // makes sure everyone has the same array of names
