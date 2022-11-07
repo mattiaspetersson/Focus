@@ -84,8 +84,8 @@ Focus {
 						defer {
 							this.updateCard(urn.next);
 						};
-						timeUnit.wait;
 					};
+					timeUnit.wait;
 				};
 
 				timeUnit.wait;
@@ -108,8 +108,8 @@ Focus {
 						defer {
 							this.updateCard(urn.next);
 						};
-						timeUnit.wait;
 					};
+					timeUnit.wait;
 				};
 
 				// new cards for everyone
@@ -125,8 +125,8 @@ Focus {
 					defer {
 						this.clearCard(urn.next);
 					};
-					timeUnit.wait;
 				};
+				timeUnit.wait;
 			};
 
 			// fade to grey
