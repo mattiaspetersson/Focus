@@ -11,7 +11,7 @@ Focus {
 
 	var name, numPlayers, numCards, restProbability, timeUnit, fontSize, repeats;
 	var win, cards, strategy, clearedCards, tempoClock;
-	var hail, <peers, peerNames, <scrambledPeerArray;
+	var hail, <peers, peerNames, <scrambledPeerArray, <maxNumCards;
 
 	*new {|name = 'yourNameHere', numPlayers = 10, numCards = 1, restProbability = 0.1, timeUnit = 9, fontSize = 18, repeats = 1|
 		^super.newCopyArgs(name, numPlayers, numCards, restProbability, timeUnit, fontSize, repeats).initFocus;
@@ -31,13 +31,20 @@ Focus {
 			msg[1].postln;
 		}, '/infoMsg');
 
+		/*OSCdef(\maxNumCards, {|msg|
+			maxNumCards = numCards.max(msg[2]);
+			"% changed the maximum number of cards to %".format(msg[1], msg[2]).postln;
+		}, '/maxNumCards');*/
+
 		OSCdef(name.asSymbol, {|msg|
+			var tempArray;
 			msg.removeAt(0);
 			scrambledPeerArray = msg;
+			tempArray = msg.as(Set).as(Array); // remove duplicate names for the post and check below
 			"% of % players are ready: %".format(
-				scrambledPeerArray.size, numPlayers, scrambledPeerArray
+				tempArray.size, numPlayers, tempArray
 			).postln;
-			if(numPlayers == scrambledPeerArray.size) {"Press space together to start.".postln};
+			if(numPlayers == tempArray.size) {"Press space together to start.".postln};
 		}, '/newPeerArray');
 
 		this.makeWindow(4); // spacing in pixels
@@ -49,21 +56,29 @@ Focus {
 	}
 
 	scramblePeerArray { // makes sure everyone has the same array of names
-		scrambledPeerArray = peers.names.asArray.scramble;
+		scrambledPeerArray = peers.names.asArray;
+		(numCards - 1).do{scrambledPeerArray = scrambledPeerArray.add(name)};
+		scrambledPeerArray = scrambledPeerArray.scramble;
 		peers.sendAll('/newPeerArray', *scrambledPeerArray);
 	}
 
+	/*setMaxNumCards {
+		peers.sendAll('/maxNumCards', name, numCards);
+	}*/
+
 	obliquePlayer {
-		var urn = Pn(Pshuf(Array.series(numPlayers))).asStream;
+		// an urn to make sure all cards are updated, but in random order
+		var urn = Pn(Pshuf(Array.series(numCards))).asStream;
 		clearedCards = [];
 
 		^Task {
 			// intro (fade in cards)
-			cards.do{|c| c.flash(3*timeUnit, 'up')};
-			(4*timeUnit).wait;
+			"Started! Fade in your sound(s)...".postln;
+			cards.do{|c| c.flash(3 * timeUnit, 'up')};
+			(4 * timeUnit).wait;
 
-			repeats.do{
-				// new cards for each player one by one
+			repeats.do{ // repeat the body of the piece n times
+				// update all cards for each player one player and one card by one
 				scrambledPeerArray.do{|n|
 					if(n == name) {
 						defer {
@@ -72,29 +87,22 @@ Focus {
 						timeUnit.wait;
 					};
 				};
-				/*numPlayers.do{|i|
-					defer {
-						this.updateCard(urn.next);
-					};
-					timeUnit.wait;
-				};*/
+
 				timeUnit.wait;
 
-				// new cards for everyone
+				// update all cards for everyone
 				defer {
 					cards.size.do{|i| this.updateCard(i)};
 				};
-				(7*timeUnit).wait;
+				(7 * timeUnit).wait;
 
-				// new cards for everyone
+				// update all cards for everyone
 				defer {
 					cards.size.do{|i| this.updateCard(i)};
 				};
-				//(1*timeUnit).wait;
-				//cards.do{|c| c.flash(8*timeUnit, 'up')};
-				(9*timeUnit).wait;
+				(9 * timeUnit).wait;
 
-				// new cards for each player one by one
+				// update all cards for each player one player and one card by one
 				scrambledPeerArray.do{|n|
 					if(n == name) {
 						defer {
@@ -104,18 +112,11 @@ Focus {
 					};
 				};
 
-				/*numPlayers.do{|i|
-					defer {
-						this.updateCard(urn.next);
-					};
-					timeUnit.wait;
-				};*/
-
 				// new cards for everyone
 				defer {
 					cards.size.do{|i| this.updateCard(i)};
 				};
-				(9*timeUnit).wait;
+				(9 * timeUnit).wait;
 			};
 
 			// clear cards for each player one by one
@@ -128,17 +129,12 @@ Focus {
 				};
 			};
 
-			/*numPlayers.do{|i|
-				defer {
-					this.clearCard(urn.next);
-				};
-				timeUnit.wait;
-			};*/
-
 			// fade to grey
 			defer {
 				cards.do{|c| c.fadeOut(9, win.background)};
 			};
+
+			"fade out...".postln;
 		};
 	}
 
