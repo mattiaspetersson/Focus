@@ -11,9 +11,9 @@ Focus {
 
 	var name, numCards, restProbability, timeUnit, fontSize, repeats;
 	var win, cards, strategy, clearedCards, tempoClock;
-	var hail, <peers, peerNames, <scrambledPeerArray, <maxNumCards;
+	var hail, <peers, peerNames, <scrambledPeerArray;
 
-	*new {|name = 'yourNameHere', numCards = 1, restProbability = 0.1, timeUnit = 9, fontSize = 18, repeats = 1|
+	*new {|name = 'yourNameHere', numCards = 1, restProbability = 0.0, timeUnit = 9, fontSize = 18, repeats = 1|
 		^super.newCopyArgs(name, numCards, restProbability, timeUnit, fontSize, repeats).initFocus;
 	}
 
@@ -30,11 +30,6 @@ Focus {
 		OSCdef(\info, {|msg|
 			msg[1].postln;
 		}, '/infoMsg');
-
-		/*OSCdef(\maxNumCards, {|msg|
-			maxNumCards = numCards.max(msg[2]);
-			"% changed the maximum number of cards to %".format(msg[1], msg[2]).postln;
-		}, '/maxNumCards');*/
 
 		OSCdef(name.asSymbol, {|msg|
 			var tempArray;
@@ -61,10 +56,6 @@ Focus {
 		scrambledPeerArray = scrambledPeerArray.scramble;
 		peers.sendAll('/newPeerArray', *scrambledPeerArray);
 	}
-
-	/*setMaxNumCards {
-		peers.sendAll('/maxNumCards', name, numCards);
-	}*/
 
 	obliquePlayer {
 		// an urn to make sure all cards are updated, but in random order
@@ -157,7 +148,10 @@ Focus {
 
 	makeWindow {|space|
 		var obPlayer, grid, for, by;
+		// this needs fixing!!!
 		case {numCards == 1} {for = 1; by = 1};
+		case {numCards == 2} {for = 2; by = 1};
+		case {numCards == 3} {for = 3; by = 1};
 		case {numCards == 4} {for = 2; by = 2};
 		case {numCards == 8} {for = 4; by = 2};
 		case {numCards == 9} {for = 3; by = 3};
