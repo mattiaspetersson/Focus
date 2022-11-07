@@ -9,12 +9,12 @@
 
 Focus {
 
-	var name, numPlayers, numCards, restProbability, timeUnit, fontSize, repeats;
+	var name, numCards, restProbability, timeUnit, fontSize, repeats;
 	var win, cards, strategy, clearedCards, tempoClock;
 	var hail, <peers, peerNames, <scrambledPeerArray, <maxNumCards;
 
-	*new {|name = 'yourNameHere', numPlayers = 10, numCards = 1, restProbability = 0.1, timeUnit = 9, fontSize = 18, repeats = 1|
-		^super.newCopyArgs(name, numPlayers, numCards, restProbability, timeUnit, fontSize, repeats).initFocus;
+	*new {|name = 'yourNameHere', numCards = 1, restProbability = 0.1, timeUnit = 9, fontSize = 18, repeats = 1|
+		^super.newCopyArgs(name, numCards, restProbability, timeUnit, fontSize, repeats).initFocus;
 	}
 
 	initFocus {
@@ -41,10 +41,10 @@ Focus {
 			msg.removeAt(0);
 			scrambledPeerArray = msg;
 			tempArray = msg.as(Set).as(Array); // remove duplicate names for the post and check below
-			"% of % players are ready: %".format(
-				tempArray.size, numPlayers, tempArray
+
+			"% players are ready to play: %".format(
+				tempArray.size, tempArray
 			).postln;
-			if(numPlayers == tempArray.size) {"Press space together to start.".postln};
 		}, '/newPeerArray');
 
 		this.makeWindow(4); // spacing in pixels
