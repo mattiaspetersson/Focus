@@ -27,10 +27,16 @@ Focus {
 		peers = hail.addrBook;
 		peerNames = peers.names; // returns a Set
 
+		OSCdef(\info, {|msg|
+			msg[1].postln;
+		}, '/infoMsg');
+
 		OSCdef(name.asSymbol, {|msg|
 			msg.removeAt(0);
 			scrambledPeerArray = msg;
-			"% of % players are ready: %".format(scrambledPeerArray.size, numPlayers, scrambledPeerArray).postln;
+			"% of % players are ready: %".format(
+				scrambledPeerArray.size, numPlayers, scrambledPeerArray
+			).postln;
 			if(numPlayers == scrambledPeerArray.size) {"Press space together to start.".postln};
 		}, '/newPeerArray');
 
@@ -89,12 +95,21 @@ Focus {
 				(9*timeUnit).wait;
 
 				// new cards for each player one by one
-				numPlayers.do{|i|
+				scrambledPeerArray.do{|n|
+					if(n == name) {
+						defer {
+							this.updateCard(urn.next);
+						};
+						timeUnit.wait;
+					};
+				};
+
+				/*numPlayers.do{|i|
 					defer {
 						this.updateCard(urn.next);
 					};
 					timeUnit.wait;
-				};
+				};*/
 
 				// new cards for everyone
 				defer {
@@ -104,12 +119,21 @@ Focus {
 			};
 
 			// clear cards for each player one by one
-			numPlayers.do{|i|
+			scrambledPeerArray.do{|n|
+				if(n == name) {
+					defer {
+						this.clearCard(urn.next);
+					};
+					timeUnit.wait;
+				};
+			};
+
+			/*numPlayers.do{|i|
 				defer {
 					this.clearCard(urn.next);
 				};
 				timeUnit.wait;
-			};
+			};*/
 
 			// fade to grey
 			defer {
@@ -124,6 +148,9 @@ Focus {
 		}, {
 			cards[i].flash(flashTime).string_(strategy.next);
 		});
+		peers.sendAll('/infoMsg',
+			"%'s card no. % changed focus to %!".format(name, i, cards[i].text.string);
+		);
 	}
 
 	clearCard {|i|
@@ -219,7 +246,7 @@ Focus {
 
 FocusCard {
 	var card, <cardClr, cardSize, flashClr, <fader;
-	var font, text;
+	var font, <text;
 
 	*new {|fontSize = 18, cardSize = 300|
 		^super.new.initFocusCard(fontSize, cardSize)
