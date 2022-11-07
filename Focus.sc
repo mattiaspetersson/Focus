@@ -82,7 +82,6 @@ Focus {
 					};
 					timeUnit.wait;
 				};
-
 				timeUnit.wait;
 
 				// update all cards for everyone
