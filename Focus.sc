@@ -22,6 +22,7 @@ Focus {
 		strategy = Pn(Pshuf(this.strategies)).asStream;
 		tempoClock = TempoClock.default;
 		tempoClock.tempo = 1;
+		scrambledPeerArray = [];
 
 		hail = Hail(me: Peer(name.asSymbol, NetAddr.localAddr), oscPath: '/focus');
 		peers = hail.addrBook;
@@ -35,7 +36,7 @@ Focus {
 			var tempArray;
 			msg.removeAt(0);
 			scrambledPeerArray = msg;
-			tempArray = msg.as(Set).as(Array); // remove duplicate names for the post and check below
+			tempArray = msg.as(Set).as(Array); // remove duplicate names for the message below
 
 			"% players are ready to play: %".format(
 				tempArray.size, tempArray
@@ -46,14 +47,17 @@ Focus {
 
 		fork{
 			3.wait;
-			this.scramblePeerArray;
+			this.getPeerArray;
 		};
 	}
 
-	scramblePeerArray { // makes sure everyone has the same array of names
-		scrambledPeerArray = peers.names.asArray;
+	getPeerArray { // makes sure everyone has the same array of names
+		var tempArray;
+		tempArray = peers.names.asArray; // peers.names returns a Set which means there can be no duplicates!
+
 		(numCards - 1).do{scrambledPeerArray = scrambledPeerArray.add(name)};
-		scrambledPeerArray = scrambledPeerArray.scramble;
+		scrambledPeerArray = (scrambledPeerArray ++ tempArray).scramble;
+
 		peers.sendAll('/newPeerArray', *scrambledPeerArray);
 	}
 
