@@ -22,7 +22,7 @@ Focus {
 		strategy = Pn(Pshuf(this.strategies)).asStream;
 		tempoClock = TempoClock.default;
 		tempoClock.tempo = 1;
-		scrambledPeerArray = [];
+		//scrambledPeerArray = [];
 
 		hail = Hail(me: Peer(name.asSymbol, NetAddr.localAddr), oscPath: '/focus');
 		peers = hail.addrBook;
@@ -51,15 +51,25 @@ Focus {
 		};
 	}
 
-	getPeerArray { // makes sure everyone has the same array of names
+	// TESTA DENNA!
+	getPeerArray { // should make sure everyone has the same array of names
 		var tempArray;
-		tempArray = peers.names.asArray; // peers.names returns a Set which means there can be no duplicates!
+		tempArray = scrambledPeerArray ? [];
+		numCards.do{tempArray = tempArray.add(name)};
+		scrambledPeerArray = tempArray.scramble;
+		peers.sendAll('/newPeerArray', *scrambledPeerArray);
+	}
+
+	/*getPeerArray { // should make sure everyone has the same array of names
+		var tempArray;
+		// peers.names returns a Set which means there can be no duplicates!
+		tempArray = peers.names.asArray;
 
 		(numCards - 1).do{scrambledPeerArray = scrambledPeerArray.add(name)};
 		scrambledPeerArray = (scrambledPeerArray ++ tempArray).scramble;
 
 		peers.sendAll('/newPeerArray', *scrambledPeerArray);
-	}
+	}*/
 
 	obliquePlayer {
 		// an urn to make sure all cards are updated, but in random order
