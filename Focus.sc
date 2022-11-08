@@ -51,16 +51,16 @@ Focus {
 		};
 	}
 
-	// TESTA DENNA!
-	getPeerArray { // should make sure everyone has the same array of names
+	// TESTA DENNA! Nej...
+	/*getPeerArray { // should make sure everyone has the same array of names
 		var tempArray;
 		tempArray = scrambledPeerArray ? [];
 		numCards.do{tempArray = tempArray.add(name)};
 		scrambledPeerArray = tempArray.scramble;
 		peers.sendAll('/newPeerArray', *scrambledPeerArray);
-	}
+	}*/
 
-	/*getPeerArray { // should make sure everyone has the same array of names
+	getPeerArray { // should make sure everyone has the same array of names
 		var tempArray;
 		// peers.names returns a Set which means there can be no duplicates!
 		tempArray = peers.names.asArray;
@@ -69,7 +69,7 @@ Focus {
 		scrambledPeerArray = (scrambledPeerArray ++ tempArray).scramble;
 
 		peers.sendAll('/newPeerArray', *scrambledPeerArray);
-	}*/
+	}
 
 	obliquePlayer {
 		// an urn to make sure all cards are updated, but in random order
